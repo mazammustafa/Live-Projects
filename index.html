@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>All Projects — Azam Mustafa</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  
+</head>
+<body>
+
+  <button class="fab" id="fabBtn" title="Add New Project">+</button>
+
+  <div class="modal-overlay" id="modalOverlay">
+    <div class="modal">
+      <div class="modal-header">
+        <h2>Add New Project</h2>
+        <button class="modal-close" id="modalClose">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-row full"><div class="fg"><label>Project Title *</label><input type="text" id="m-title" placeholder="e.g. Takwa Home Care"></div></div>
+        <div class="form-row full"><div class="fg">
+          <label>Logo / Image URL (leave blank to auto-fetch favicon)</label>
+          <input type="url" id="m-img" placeholder="https://example.com/logo.png">
+          <div class="img-preview" id="m-preview"><img id="m-preview-img" src="" alt="preview"><span>Preview</span></div>
+        </div></div>
+        <div class="form-row">
+          <div class="fg"><label>Live URL</label><input type="url" id="m-live" placeholder="https://example.com/"></div>
+          <div class="fg"><label>Staging URL</label><input type="url" id="m-staging" placeholder="https://staging.example.com/"></div>
+        </div>
+        <div class="form-row full"><div class="fg"><label>Developer Name *</label><input type="text" id="m-dev" value="Muhammad Azam Mustafa"></div></div>
+        <div class="form-footer">
+          <button class="btn-clear" id="modalCancelBtn">Cancel</button>
+          <button class="btn-submit" id="modalSubmitBtn">+ Add Project</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="page">
+    <div class="hero">
+      <div class="hero-left">
+        <h1>All Projects</h1>
+        <p>Muhammad Azam Mustafa &mdash; Portfolio</p>
+      </div>
+      <div class="hero-right">
+        <div class="stat"><div class="stat-num" id="stat-total">0</div><div class="stat-label">Projects</div></div>
+        <div class="stat"><div class="stat-num" id="stat-live">0</div><div class="stat-label">Live</div></div>
+      </div>
+    </div>
+
+    <div class="section-label">Portfolio</div>
+    <div class="grid" id="projectsGrid"></div>
+
+    <div class="section-label">Add New Project</div>
+    <div class="form-section">
+      <div class="form-header"><h2>Project Details</h2><span>* required fields</span></div>
+      <div class="form-row full"><div class="fg"><label>Project Title *</label><input type="text" id="f-title" placeholder="e.g. Takwa Home Care"></div></div>
+      <div class="form-row full"><div class="fg">
+        <label>Logo / Image URL (leave blank to auto-fetch favicon)</label>
+        <input type="url" id="f-img" placeholder="https://example.com/logo.png">
+        <div class="img-preview" id="f-preview"><img id="f-preview-img" src="" alt="preview"><span>Preview</span></div>
+      </div></div>
+      <div class="form-row">
+        <div class="fg"><label>Live URL</label><input type="url" id="f-live" placeholder="https://example.com/"></div>
+        <div class="fg"><label>Staging URL</label><input type="url" id="f-staging" placeholder="https://staging.example.com/"></div>
+      </div>
+      <div class="form-row full"><div class="fg"><label>Developer Name *</label><input type="text" id="f-dev" value="Muhammad Azam Mustafa"></div></div>
+      <div class="form-footer">
+        <button class="btn-clear" onclick="clearInlineForm()">Clear</button>
+        <button class="btn-submit" onclick="addFromInline()">+ Add Project</button>
+      </div>
+      <div class="save-status"><div class="save-dot"></div><span id="save-msg">All data auto-saved in browser storage</span></div>
+    </div>
+  </div>
+
+  <footer class="footer">&copy; Copyright All rights reserved. &nbsp;|&nbsp; Developed By Muhammad Azam Mustafa.</footer>
+  <div class="toast" id="toast"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>
