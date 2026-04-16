@@ -6,15 +6,76 @@
     <title>Project Manager — Azam Mustafa</title>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
+    <style>
+        /* Extra styles for new UI elements */
+        #loginOverlay { display: none; align-items: center; justify-content: center; z-index: 1000; }
+        #loginOverlay.open { display: flex; }
+        
+        .header-actions {
+            position: absolute;
+            top: 25px;
+            right: 25px;
+            display: flex;
+            gap: 12px;
+            z-index: 100;
+        }
+
+        .btn-auth {
+            padding: 8px 18px;
+            border-radius: 8px;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            transition: 0.3s;
+        }
+
+        #loginBtn { background: #007bff; color: white; }
+        #loginBtn:hover { background: #0056b3; }
+
+        #logoutBtn { background: #ff4757; color: white; display: none; }
+        #logoutBtn:hover { background: #e04050; }
+
+        /* Floating Action Button (Initially Hidden) */
+        .fab { display: none; }
+    </style>
 </head>
 <body>
 
-    <button class="fab" onclick="openModal()" title="Add Project">+</button>
+    <div class="header-actions">
+        <button id="loginBtn" class="btn-auth" onclick="openLoginModal()">Login</button>
+        <button id="logoutBtn" class="btn-auth" onclick="handleLogout()">Logout</button>
+    </div>
+
+    <div class="modal-overlay" id="loginOverlay">
+        <div class="modal" style="max-width: 380px;">
+            <div class="modal-header">
+                <h2>Admin Login</h2>
+                <button class="modal-close" onclick="closeLoginModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="fg">
+                    <label>Email Address</label>
+                    <input type="email" id="login-email" placeholder="admin@example.com">
+                </div>
+                <div class="fg">
+                    <label>Password</label>
+                    <input type="password" id="login-pass" placeholder="••••••••">
+                </div>
+                <div class="modal-footer">
+                    <button class="btn-clear" onclick="closeLoginModal()">Cancel</button>
+                    <button class="btn-submit" onclick="handleLogin()" style="flex: 1;">Login</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <button class="fab" id="addBtn" onclick="openModal()" title="Add Project">+</button>
 
     <div class="modal-overlay" id="modalOverlay">
         <div class="modal">
             <div class="modal-header">
-                <h2>Naya Project Add Karein</h2>
+                <h2>Add New Project</h2>
                 <button class="modal-close" onclick="closeModal()">&times;</button>
             </div>
             <div class="modal-body">
@@ -50,7 +111,7 @@
         <div class="hero">
             <div class="hero-left">
                 <h1>All Projects</h1>
-                <p>Portfolio Manager</p>
+                <p>Portfolio Manager — Azam Mustafa</p>
             </div>
             <div class="hero-right">
                 <div class="stat">
@@ -70,6 +131,8 @@
 
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    
     <script src="app.js"></script>
 </body>
 </html>

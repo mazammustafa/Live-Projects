@@ -551,6 +551,14 @@ body {
 
 .modal-body {
     padding: 18px 26px 26px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.modal-footer {
+    display: flex;
+    gap: 15px;
 }
 
 .toast {
