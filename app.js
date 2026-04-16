@@ -1,3 +1,31 @@
+// Firebase Configuration
+// Yahan apni Firebase config details daal dena
+ // Import the functions you need from the SDKs you need
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-app.js";
+  import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-analytics.js";
+  // TODO: Add SDKs for Firebase products that you want to use
+  // https://firebase.google.com/docs/web/setup#available-libraries
+
+  // Your web app's Firebase configuration
+  // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+  const firebaseConfig = {
+    apiKey: "AIzaSyANaTGjip95Zd2ITIK91MaDV12T4LIRbPs",
+    authDomain: "live-projtect.firebaseapp.com",
+    projectId: "live-projtect",
+    storageBucket: "live-projtect.firebasestorage.app",
+    messagingSenderId: "968166939491",
+    appId: "1:968166939491:web:b62a11c30e5df802bcd156",
+    measurementId: "G-CP52QH4T0Z"
+  };
+
+  // Initialize Firebase
+  const app = initializeApp(firebaseConfig);
+  const analytics = getAnalytics(app);
+
+// Firebase Initialize
+firebase.initializeApp(firebaseConfig);
+const database = firebase.database();
+const projectsRef = database.ref('projects');
 
 var STORAGE_KEY = 'azam_portfolio_v3';
 
@@ -139,34 +167,75 @@ var DEFAULT_PROJECTS = [
     { id: 213, title: 'Seventh Base Foundation', img: '', live: 'https://seventhbasefoundation.org/', staging: '', dev: 'Muhammad Azam Mustafa' }
 ];
 
-function loadProjects() {
+var projects = [];
+var isFirebaseReady = false;
+
+// Firebase se projects load karna
+function loadProjectsFromFirebase() {
+    projectsRef.once('value')
+        .then(function(snapshot) {
+            var data = snapshot.val();
+            if (data && Array.isArray(data) && data.length > 0) {
+                projects = data;
+            } else {
+                // Agar Firebase mein data nahi hai tou default use karo aur Firebase mein save karo
+                projects = JSON.parse(JSON.stringify(DEFAULT_PROJECTS));
+                saveProjectsToFirebase();
+            }
+            isFirebaseReady = true;
+            render();
+            showToast('Projects loaded from Firebase!');
+        })
+        .catch(function(error) {
+            console.error('Firebase load error:', error);
+            // Fallback to localStorage
+            projects = loadProjectsFromLocalStorage();
+            isFirebaseReady = true;
+            render();
+            showToast('Loaded from local backup');
+        });
+}
+
+// Firebase mein projects save karna
+function saveProjectsToFirebase() {
+    if (!isFirebaseReady) return;
+    
+    projectsRef.set(projects)
+        .then(function() {
+            // Backup ke liye localStorage mein bhi save karo
+            try {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(projects));
+            } catch (e) {}
+            
+            document.getElementById('save-msg').textContent = 'Saved to Firebase at ' + new Date().toLocaleTimeString();
+            console.log('Saved to Firebase successfully!');
+        })
+        .catch(function(error) {
+            console.error('Firebase save error:', error);
+            showToast('Error saving to Firebase!');
+        });
+}
+
+// LocalStorage se load karna (backup ke liye)
+function loadProjectsFromLocalStorage() {
     try {
         var raw = localStorage.getItem(STORAGE_KEY);
-        if (raw) { var p = JSON.parse(raw); if (Array.isArray(p) && p.length > 0) return p; }
+        if (raw) { 
+            var p = JSON.parse(raw); 
+            if (Array.isArray(p) && p.length > 0) return p; 
+        }
     } catch (e) { }
     return JSON.parse(JSON.stringify(DEFAULT_PROJECTS));
 }
 
-function saveProjects() {
-    try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(projects));
-        document.getElementById('save-msg').textContent = 'Saved at ' + new Date().toLocaleTimeString();
-    } catch (e) { }
+function initials(n) { 
+    return n.split(' ').slice(0, 2).map(function (w) { return w[0]; }).join('').toUpperCase(); 
 }
-
-var projects = loadProjects();
-
-function faviconUrl(liveUrl) {
-    if (!liveUrl) return '';
-    try { var u = new URL(liveUrl); return 'https://www.google.com/s2/favicons?sz=64&domain=' + u.hostname; }
-    catch (e) { return ''; }
-}
-
-function initials(n) { return n.split(' ').slice(0, 2).map(function (w) { return w[0]; }).join('').toUpperCase(); }
 
 function showToast(msg) {
     var t = document.getElementById('toast');
-    t.textContent = msg; t.classList.add('show');
+    t.textContent = msg; 
+    t.classList.add('show');
     setTimeout(function () { t.classList.remove('show'); }, 2600);
 }
 
@@ -185,7 +254,7 @@ function makeCard(p, isNew) {
         + '<div class="card-monogram" style="display:none">' + initials(p.title) + '</div>'
         : '<div class="card-monogram">' + initials(p.title) + '</div>';
     var badges = '';
-    if (p.live) badges += '<a class="badge badge-live"    href="' + p.live + '" target="_blank">Live</a>';
+    if (p.live) badges += '<a class="badge badge-live" href="' + p.live + '" target="_blank">Live</a>';
     if (p.staging) badges += '<a class="badge badge-staging" href="' + p.staging + '" target="_blank">Staging</a>';
     card.innerHTML =
         '<button class="del-btn" onclick="deleteProject(' + p.id + ',event)">&#x00D7;</button>' +
@@ -215,67 +284,117 @@ function deleteProject(id, e) {
     e.stopPropagation();
     if (!confirm('Remove this project?')) return;
     projects = projects.filter(function (p) { return p.id !== id; });
-    saveProjects();
+    saveProjectsToFirebase();
     var el = document.querySelector('.card[data-id="' + id + '"]');
-    if (el) { el.style.transition = 'all 0.22s'; el.style.opacity = '0'; el.style.transform = 'scale(0.8)'; setTimeout(function () { el.remove(); updateStats(); }, 220); }
-    showToast('Project removed.');
+    if (el) { 
+        el.style.transition = 'all 0.22s'; 
+        el.style.opacity = '0'; 
+        el.style.transform = 'scale(0.8)'; 
+        setTimeout(function () { el.remove(); updateStats(); }, 220); 
+    }
+    showToast('Project removed from Firebase.');
 }
 
 function addProject(title, img, live, staging, dev) {
-    if (!title || !dev) { showToast('Title aur Developer name zaroori hai!'); return false; }
-    var p = { id: Date.now(), title: title.trim(), img: img.trim(), live: live.trim(), staging: staging.trim(), dev: dev.trim() };
+    if (!title || !dev) { 
+        showToast('Title aur Developer name zaroori hai!'); 
+        return false; 
+    }
+    var p = { 
+        id: Date.now(), 
+        title: title.trim(), 
+        img: img.trim(), 
+        live: live.trim(), 
+        staging: staging.trim(), 
+        dev: dev.trim() 
+    };
     projects.push(p);
-    saveProjects();
+    saveProjectsToFirebase();
     var grid = document.getElementById('projectsGrid');
     var comings = grid.querySelectorAll('.coming-card');
     var card = makeCard(p, true);
-    if (comings.length > 0) grid.insertBefore(card, comings[0]); else grid.appendChild(card);
+    if (comings.length > 0) grid.insertBefore(card, comings[0]); 
+    else grid.appendChild(card);
     updateStats();
-    showToast('Project added!');
+    showToast('Project added to Firebase!');
     return true;
 }
 
 function addFromInline() {
-    var ok = addProject(document.getElementById('f-title').value, document.getElementById('f-img').value, document.getElementById('f-live').value, document.getElementById('f-staging').value, document.getElementById('f-dev').value);
+    var ok = addProject(
+        document.getElementById('f-title').value, 
+        document.getElementById('f-img').value, 
+        document.getElementById('f-live').value, 
+        document.getElementById('f-staging').value, 
+        document.getElementById('f-dev').value
+    );
     if (ok) clearInlineForm();
 }
 
 function clearInlineForm() {
-    ['f-title', 'f-img', 'f-live', 'f-staging'].forEach(function (id) { document.getElementById(id).value = ''; });
+    ['f-title', 'f-img', 'f-live', 'f-staging'].forEach(function (id) { 
+        document.getElementById(id).value = ''; 
+    });
     document.getElementById('f-dev').value = 'Muhammad Azam Mustafa';
     document.getElementById('f-preview').style.display = 'none';
 }
 
 function setupPreview(inputId, previewId, imgId) {
-    var input = document.getElementById(inputId), wrap = document.getElementById(previewId), img = document.getElementById(imgId), t;
+    var input = document.getElementById(inputId), 
+        wrap = document.getElementById(previewId), 
+        img = document.getElementById(imgId), 
+        t;
     input.addEventListener('input', function () {
         clearTimeout(t);
         t = setTimeout(function () {
             var url = input.value.trim();
-            if (url) { img.src = url; img.onload = function () { wrap.style.display = 'flex'; }; img.onerror = function () { wrap.style.display = 'none'; }; }
-            else { wrap.style.display = 'none'; }
+            if (url) { 
+                img.src = url; 
+                img.onload = function () { wrap.style.display = 'flex'; }; 
+                img.onerror = function () { wrap.style.display = 'none'; }; 
+            } else { 
+                wrap.style.display = 'none'; 
+            }
         }, 600);
     });
 }
+
 setupPreview('f-img', 'f-preview', 'f-preview-img');
 setupPreview('m-img', 'm-preview', 'm-preview-img');
 
 var overlay = document.getElementById('modalOverlay');
-function openModal() { overlay.classList.add('open'); document.body.style.overflow = 'hidden'; document.getElementById('m-title').focus(); }
+
+function openModal() { 
+    overlay.classList.add('open'); 
+    document.body.style.overflow = 'hidden'; 
+    document.getElementById('m-title').focus(); 
+}
+
 function closeModal() {
-    overlay.classList.remove('open'); document.body.style.overflow = '';
-    ['m-title', 'm-img', 'm-live', 'm-staging'].forEach(function (id) { document.getElementById(id).value = ''; });
+    overlay.classList.remove('open'); 
+    document.body.style.overflow = '';
+    ['m-title', 'm-img', 'm-live', 'm-staging'].forEach(function (id) { 
+        document.getElementById(id).value = ''; 
+    });
     document.getElementById('m-dev').value = 'Muhammad Azam Mustafa';
     document.getElementById('m-preview').style.display = 'none';
 }
+
 document.getElementById('fabBtn').addEventListener('click', openModal);
 document.getElementById('modalClose').addEventListener('click', closeModal);
 document.getElementById('modalCancelBtn').addEventListener('click', closeModal);
 overlay.addEventListener('click', function (e) { if (e.target === overlay) closeModal(); });
 document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeModal(); });
 document.getElementById('modalSubmitBtn').addEventListener('click', function () {
-    var ok = addProject(document.getElementById('m-title').value, document.getElementById('m-img').value, document.getElementById('m-live').value, document.getElementById('m-staging').value, document.getElementById('m-dev').value);
+    var ok = addProject(
+        document.getElementById('m-title').value, 
+        document.getElementById('m-img').value, 
+        document.getElementById('m-live').value, 
+        document.getElementById('m-staging').value, 
+        document.getElementById('m-dev').value
+    );
     if (ok) closeModal();
 });
 
-render();
+// Page load hone pe Firebase se data load karo
+loadProjectsFromFirebase();
