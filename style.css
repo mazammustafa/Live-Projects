@@ -541,7 +541,7 @@ body {
     align-items: center;
     justify-content: center;
     color: var(--ink2);
-    font-family: var(--font);
+    /* font-family: var(--font); */
     transition: background 0.15s;
 }
 
